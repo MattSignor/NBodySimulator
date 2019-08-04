@@ -1,0 +1,454 @@
+<html>
+<head>
+<title>NBodySimulatorFinal.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #000080; font-weight: bold;}
+.s1 { color: #000000;}
+.s2 { color: #808080; font-style: italic;}
+.s3 { color: #0000ff;}
+.s4 { color: #008080; font-weight: bold;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+NBodySimulatorFinal.py</font>
+</center></td></tr></table>
+<pre><span class="s0">from </span>numpy <span class="s0">import </span>*
+<span class="s0">from </span>vpython <span class="s0">import </span>*
+
+
+<span class="s2"># This project was created to simulate N-Body Orbits.</span>
+
+
+<span class="s0">class </span>NBody:
+    <span class="s2"># This Object will be the entire system of n bodies where the position mass velocity radius and acc are all</span>
+    # created as numpy arrays.
+
+    <span class="s0">def </span>__init__(self, pos, mass, velocity, radius, acc):
+        self.pos = pos
+        self.velocity = velocity
+        self.mass = mass
+        self.radius = radius
+        self.acc = acc
+
+    <span class="s2"># This method is created to update the position array using the velocity array and the time step</span>
+
+    <span class="s0">def </span>updatepos(self, timestep, n):
+        a = self.pos
+        b = self.velocity
+
+        <span class="s0">for </span>i <span class="s0">in </span>range(<span class="s3">0</span>, n):
+
+            <span class="s0">for </span>j <span class="s0">in </span>range(<span class="s3">0</span>, <span class="s3">3</span>):  <span class="s2"># 0, 1 ,2 for 3 dimentions</span>
+
+                a[i][j] = a[i][j] + b[i][j] * timestep / <span class="s3">2</span>
+        <span class="s0">return </span>a
+
+    <span class="s2"># This method updates the velocity array</span>
+
+    <span class="s0">def </span>updatevel(self, timestep, n):
+        a = self.velocity
+        b = self.acc
+
+        <span class="s0">for </span>i <span class="s0">in </span>range(<span class="s3">0</span>, n):
+
+            <span class="s0">for </span>j <span class="s0">in </span>range(<span class="s3">0</span>, <span class="s3">3</span>):  <span class="s2"># dimentions</span>
+
+                a[i][j] = a[i][j] + (b[i][j] * timestep)
+
+    <span class="s2"># The array's below is a work around solution to a very strange problem. For some reason elements of certain</span>
+    # numpy arrays are not assigning their values to another numpy array. This fixed the problem, but it would be
+    # interesting to farther investigate this issue.
+
+    c = array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>]])  <span class="s2"># work around for 4 body</span>
+    d = array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>]])
+    e = array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>]])
+
+    <span class="s2"># calculates the acceleration between n bodies</span>
+    <span class="s0">def </span>acceleration(self, n):
+
+        a = self.pos
+        accell = self.acc
+        m = self.mass
+        G = <span class="s3">6.67408e-11</span>
+
+        <span class="s0">for </span>i <span class="s0">in </span>range(<span class="s3">0</span>, n):
+            <span class="s2"># This is another consequence of the problem before</span>
+            <span class="s0">for </span>j <span class="s0">in </span>range(<span class="s3">0</span>, <span class="s3">3</span>):
+                <span class="s0">if </span>n == <span class="s3">4</span>:
+                    c[i][j] = <span class="s3">0</span>
+                <span class="s0">elif </span>n == <span class="s3">3</span>:
+                    d[i][j] = <span class="s3">0</span>
+                <span class="s0">elif </span>n == <span class="s3">5</span>:
+                    e[i][j] = <span class="s3">0</span>
+
+        <span class="s0">for </span>i <span class="s0">in </span>range(<span class="s3">0</span>, n):
+
+            <span class="s0">for </span>j <span class="s0">in </span>range(<span class="s3">0</span>, n):
+
+                <span class="s0">if </span>j != i:
+
+                    <span class="s0">for </span>k <span class="s0">in </span>range(<span class="s3">0</span>, <span class="s3">3</span>):
+                        <span class="s2"># Final consequence of problem</span>
+                        <span class="s0">if </span>n == <span class="s3">4</span>:  <span class="s2"># Four Body Case</span>
+
+                            c[i][k] = accell[i][k] - (G * m[j] * (a[i][k] - a[j][k])) / (
+                                        self.dist(i, j) * self.dist(i, j) * self.dist(i, j))
+
+                            accell = c
+                            self.acc = accell
+
+                        <span class="s0">elif </span>n == <span class="s3">3</span>:  <span class="s2"># Three Body Case</span>
+
+                            d[i][k] = accell[i][k] - (<span class="s3">1.0 </span>* m[j] * (a[i][k] - a[j][k])) / (
+                                    self.dist(i, j) * self.dist(i, j) * self.dist(i, j))  <span class="s2"># Use G = 1 for Figure 8</span>
+
+                            self.acc = d
+
+                        <span class="s0">elif </span>n == <span class="s3">5</span>:  <span class="s2"># Five Body Case</span>
+                            e[i][k] = accell[i][k] - (G * m[j] * (a[i][k] - a[j][k])) / (
+                                    self.dist(i, j) * self.dist(i, j) * self.dist(i, j))
+
+                            self.acc = e
+
+        <span class="s0">return </span>accell
+
+    <span class="s2"># calculates Euclidean Distance between points in arrays</span>
+    <span class="s0">def </span>dist(self, d, e):
+
+        <span class="s0">return </span>linalg.norm(self.pos[d] - self.pos[e])
+
+    <span class="s2"># Extract numbers from array and vpython vector it</span>
+    <span class="s0">def </span>vextract(self, array, row):
+        <span class="s0">return </span>vector(array[row][<span class="s3">0</span>], array[row][<span class="s3">1</span>], array[row][<span class="s3">2</span>])
+
+
+<span class="s0">if </span>__name__ == <span class="s4">&quot;__main__&quot;</span>:
+    <span class="s2"># In the main code we have an input statement that will allow the user to pick which animation they want to run</span>
+    # The current available animations triggers are: 3,4,4B,5
+
+    q = input(<span class="s4">&quot;Enter number of bodies example: &quot;</span>)
+    <span class="s0">if </span>q == <span class="s4">&quot;4&quot;</span>:
+        <span class="s2"># initialize vpython</span>
+        scene.forward = vector(<span class="s3">0</span>, -<span class="s3">1</span>, -<span class="s3">10</span>)
+
+        <span class="s2"># We need to make an n body system with position, velocity and mass arrays</span>
+        # This four-body system uses actual data of our solarsystem: Sun, Mercury, Venus and Earth
+        fourbodysystem = NBody(array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">5.7e10</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">1.1e11</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">1.5e11</span>, <span class="s3">0</span>]], dtype=float),
+                               array([<span class="s3">2e30</span>, <span class="s3">3.285e23</span>, <span class="s3">4.8e24</span>, <span class="s3">2.4e24</span>]),
+                               array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">4.7e4</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">3.5e4</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">30000</span>, <span class="s3">0</span>, <span class="s3">0</span>]], dtype=float),
+                               array([<span class="s3">695510</span>, <span class="s3">2439.7</span>, <span class="s3">6051.8</span>, <span class="s3">6378.1</span>], dtype=float),
+                               array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>]], dtype=float))
+
+        c = array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>]], dtype=float)  <span class="s2"># initialize four body acceleration array</span>
+        # One of the factors that influences the speed of the animation and the accuraccy of the integration
+        timestep = <span class="s3">1000</span>
+
+        sun1 = sphere(pos=fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">0</span>), radius=fourbodysystem.radius[<span class="s3">0</span>] * <span class="s3">10000</span>,
+                      color=color.yellow, retain=<span class="s3">1000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        sun1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">0</span>)
+        mercury1 = sphere(pos=fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">1</span>), radius=fourbodysystem.radius[<span class="s3">1</span>] * <span class="s3">1000000</span>,
+                          color=color.red, retain=<span class="s3">1000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        mercury1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">1</span>)
+
+        venus1 = sphere(pos=fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">2</span>), radius=fourbodysystem.radius[<span class="s3">2</span>] * <span class="s3">1000000</span>,
+                        color=color.orange, retain=<span class="s3">1000000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        venus1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">2</span>)
+
+        earth1 = sphere(pos=fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">3</span>), radius=fourbodysystem.radius[<span class="s3">3</span>] * <span class="s3">1000000</span>,
+                        color=color.blue, retain=<span class="s3">1000000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        earth1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">3</span>)
+
+        <span class="s0">while True</span>:
+            <span class="s2"># rate(1000000)</span>
+            fourbodysystem.updatepos(timestep, <span class="s3">4</span>)
+            sun1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">0</span>)
+            sun1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">0</span>)
+            mercury1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">1</span>)
+            mercury1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">1</span>)
+            venus1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">2</span>)
+            venus1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">2</span>)
+            earth1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">3</span>)
+            earth1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">3</span>)
+
+            <span class="s2"># print(&quot;pos2&quot;,fourbodysystem.updatepos(timestep,4))</span>
+            fourbodysystem.acceleration(<span class="s3">4</span>)
+            sun1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">0</span>)
+            sun1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">0</span>)
+            mercury1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">1</span>)
+            mercury1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">1</span>)
+            venus1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">2</span>)
+            venus1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">2</span>)
+            earth1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">3</span>)
+            earth1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">3</span>)
+
+            <span class="s2"># print(&quot;acc&quot;,fourbodysystem.acceleration(4))</span>
+            fourbodysystem.updatevel(timestep, <span class="s3">4</span>)
+            sun1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">0</span>)
+            sun1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">0</span>)
+            mercury1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">1</span>)
+            mercury1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">1</span>)
+            venus1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">2</span>)
+            venus1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">2</span>)
+            earth1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">3</span>)
+            earth1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">3</span>)
+
+            <span class="s2"># print(&quot;vel&quot;,fourbodysystem.updatevel(timestep,4))</span>
+            fourbodysystem.updatepos(timestep, <span class="s3">4</span>)
+            sun1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">0</span>)
+            sun1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">0</span>)
+            mercury1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">1</span>)
+            mercury1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">1</span>)
+            venus1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">2</span>)
+            venus1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">2</span>)
+            earth1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">3</span>)
+            earth1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">3</span>)
+
+            <span class="s2"># print(&quot;pos&quot;,fourbodysystem.pos)</span>
+
+
+
+    <span class="s0">elif </span>q == <span class="s4">&quot;4B&quot;</span>:
+        <span class="s2"># initialize vpython</span>
+        scene.forward = vector(<span class="s3">0</span>, -<span class="s3">1</span>, -<span class="s3">10</span>)
+
+        <span class="s2"># We need to make an n body system with position, velocity and mass arrays</span>
+        fourbodysystem = NBody(array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">5.7e10</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">1.1e11</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">1.5e11</span>, <span class="s3">0</span>]], dtype=float),
+                               array([<span class="s3">2e30</span>, <span class="s3">3.285e29</span>, <span class="s3">4.8e30</span>, <span class="s3">2.4e29</span>]),
+                               array([[<span class="s3">1e4</span>, <span class="s3">0</span>, <span class="s3">5e4</span>], [<span class="s3">4.7e4</span>, <span class="s3">0</span>, <span class="s3">5e4</span>], [<span class="s3">3.5e4</span>, <span class="s3">0</span>, <span class="s3">0.5e4</span>], [-<span class="s3">3e4</span>, <span class="s3">0</span>, <span class="s3">5e4</span>]], dtype=float),
+                               array([<span class="s3">695510</span>, <span class="s3">2439.7</span>, <span class="s3">6051.8</span>, <span class="s3">6378.1</span>], dtype=float),
+                               array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>]], dtype=float))
+
+        c = array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>]], dtype=float)  <span class="s2"># initialize four body acceleration array</span>
+        timestep = <span class="s3">500</span>
+
+        sun1 = sphere(pos=fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">0</span>), radius=fourbodysystem.radius[<span class="s3">0</span>] * <span class="s3">10000</span>,
+                      color=color.yellow, retain=<span class="s3">1000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        sun1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">0</span>)
+        mercury1 = sphere(pos=fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">1</span>), radius=fourbodysystem.radius[<span class="s3">1</span>] * <span class="s3">1000000</span>,
+                          color=color.red, retain=<span class="s3">1000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        mercury1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">1</span>)
+
+        venus1 = sphere(pos=fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">2</span>), radius=fourbodysystem.radius[<span class="s3">2</span>] * <span class="s3">1000000</span>,
+                        color=color.orange, retain=<span class="s3">1000000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        venus1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">2</span>)
+
+        earth1 = sphere(pos=fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">3</span>), radius=fourbodysystem.radius[<span class="s3">3</span>] * <span class="s3">1000000</span>,
+                        color=color.blue, retain=<span class="s3">1000000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        earth1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">3</span>)
+
+        <span class="s0">while True</span>:
+            rate(<span class="s3">100000</span>)
+            fourbodysystem.updatepos(timestep, <span class="s3">4</span>)
+            sun1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">0</span>)
+            sun1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">0</span>)
+            mercury1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">1</span>)
+            mercury1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">1</span>)
+            venus1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">2</span>)
+            venus1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">2</span>)
+            earth1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">3</span>)
+            earth1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">3</span>)
+
+            <span class="s2"># print(&quot;pos2&quot;,fourbodysystem.updatepos(timestep,4))</span>
+            fourbodysystem.acceleration(<span class="s3">4</span>)
+            sun1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">0</span>)
+            sun1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">0</span>)
+            mercury1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">1</span>)
+            mercury1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">1</span>)
+            venus1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">2</span>)
+            venus1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">2</span>)
+            earth1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">3</span>)
+            earth1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">3</span>)
+
+            <span class="s2"># print(&quot;acc&quot;,fourbodysystem.acceleration(4))</span>
+            fourbodysystem.updatevel(timestep, <span class="s3">4</span>)
+            sun1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">0</span>)
+            sun1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">0</span>)
+            mercury1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">1</span>)
+            mercury1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">1</span>)
+            venus1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">2</span>)
+            venus1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">2</span>)
+            earth1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">3</span>)
+            earth1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">3</span>)
+
+            <span class="s2"># print(&quot;vel&quot;,fourbodysystem.updatevel(timestep,4))</span>
+            fourbodysystem.updatepos(timestep, <span class="s3">4</span>)
+            sun1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">0</span>)
+            sun1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">0</span>)
+            mercury1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">1</span>)
+            mercury1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">1</span>)
+            venus1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">2</span>)
+            venus1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">2</span>)
+            earth1.velocity = fourbodysystem.vextract(fourbodysystem.velocity, <span class="s3">3</span>)
+            earth1.pos = fourbodysystem.vextract(fourbodysystem.pos, <span class="s3">3</span>)
+
+            <span class="s2"># print(&quot;pos&quot;,fourbodysystem.pos)</span>
+
+    <span class="s0">elif </span>q == <span class="s4">&quot;3&quot;</span>:
+
+        <span class="s2"># Everything is normalized, such that a unique solution of the &quot;Figure 8&quot; can be demonstrated.</span>
+        # G = M1 = M2 = M3 = 1
+        # The following inital conditions were found online in order to produce this solution
+
+        # If switched to regular G, M = 1e29, same positions but e10 and velocities e4, timestep=100, you get chaos.
+
+        timestep = <span class="s3">0.001</span>
+        d = array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>]], dtype=float)
+
+        <span class="s2"># initialize vpython</span>
+        scene.forward = vector(<span class="s3">0</span>, -<span class="s3">1</span>, -<span class="s3">10</span>)
+
+        <span class="s2"># We need to make an n body system with position, velocity and mass arrays</span>
+        threebodysystem = NBody(
+            array([[<span class="s3">0.97000436</span>, -<span class="s3">0.24308753</span>, <span class="s3">0.0</span>], [-<span class="s3">0.97000436</span>, <span class="s3">0.24308753</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0.0</span>]], dtype=float),
+            array([<span class="s3">1</span>, <span class="s3">1</span>, <span class="s3">1</span>]),
+            array([[<span class="s3">0.466203685</span>, <span class="s3">0.43236573</span>, <span class="s3">0.2</span>], [<span class="s3">0.466203685</span>, <span class="s3">0.43236573</span>, <span class="s3">0.2</span>], [-<span class="s3">0.93240737</span>, -<span class="s3">0.86473146</span>, <span class="s3">0.2</span>]],
+                  dtype=float),
+            array([<span class="s3">0.05</span>, <span class="s3">0.05</span>, <span class="s3">0.05</span>], dtype=float),
+            array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>]], dtype=float))
+
+        p1 = sphere(pos=threebodysystem.vextract(threebodysystem.pos, <span class="s3">0</span>), radius=threebodysystem.radius[<span class="s3">0</span>],
+                    color=color.yellow, retain=<span class="s3">1000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        p1.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">0</span>)
+        p2 = sphere(pos=threebodysystem.vextract(threebodysystem.pos, <span class="s3">1</span>), radius=threebodysystem.radius[<span class="s3">1</span>],
+                    color=color.red, retain=<span class="s3">1000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        p2.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">1</span>)
+
+        p3 = sphere(pos=threebodysystem.vextract(threebodysystem.pos, <span class="s3">2</span>), radius=threebodysystem.radius[<span class="s3">2</span>],
+                    color=color.orange, retain=<span class="s3">1000000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        p3.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">2</span>)
+
+        <span class="s0">while True</span>:
+            <span class="s2"># Notice that we can run this code at a much smaller rate than before as the computer is dealing</span>
+            # with much smaller and more reasonable numbers.
+            rate(<span class="s3">100</span>)
+            threebodysystem.updatepos(timestep, <span class="s3">3</span>)
+            p1.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">0</span>)
+            p1.pos = threebodysystem.vextract(threebodysystem.pos, <span class="s3">0</span>)
+            p2.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">1</span>)
+            p2.pos = threebodysystem.vextract(threebodysystem.pos, <span class="s3">1</span>)
+            p3.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">2</span>)
+            p3.pos = threebodysystem.vextract(threebodysystem.pos, <span class="s3">2</span>)
+
+            <span class="s2"># print(&quot;pos2&quot;,threebodysystem.updatepos(timestep,4))</span>
+            threebodysystem.acceleration(<span class="s3">3</span>)
+            p1.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">0</span>)
+            p1.pos = threebodysystem.vextract(threebodysystem.pos, <span class="s3">0</span>)
+            p2.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">1</span>)
+            p2.pos = threebodysystem.vextract(threebodysystem.pos, <span class="s3">1</span>)
+            p3.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">2</span>)
+            p3.pos = threebodysystem.vextract(threebodysystem.pos, <span class="s3">2</span>)
+
+            <span class="s2"># print(&quot;acc&quot;,threebodysystem.acceleration(4))</span>
+            threebodysystem.updatevel(timestep, <span class="s3">3</span>)
+            p1.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">0</span>)
+            p1.pos = threebodysystem.vextract(threebodysystem.pos, <span class="s3">0</span>)
+            p2.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">1</span>)
+            p2.pos = threebodysystem.vextract(threebodysystem.pos, <span class="s3">1</span>)
+            p3.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">2</span>)
+            p3.pos = threebodysystem.vextract(threebodysystem.pos, <span class="s3">2</span>)
+
+            <span class="s2"># print(&quot;vel&quot;,threebodysystem.updatevel(timestep,4))</span>
+            threebodysystem.updatepos(timestep, <span class="s3">3</span>)
+            p1.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">0</span>)
+            p1.pos = threebodysystem.vextract(threebodysystem.pos, <span class="s3">0</span>)
+            p2.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">1</span>)
+            p2.pos = threebodysystem.vextract(threebodysystem.pos, <span class="s3">1</span>)
+            p3.velocity = threebodysystem.vextract(threebodysystem.velocity, <span class="s3">2</span>)
+            p3.pos = threebodysystem.vextract(threebodysystem.pos, <span class="s3">2</span>)
+
+            <span class="s2"># print(&quot;pos&quot;,threebodysystem.pos)</span>
+
+
+    <span class="s0">elif </span>q == <span class="s4">&quot;5&quot;</span>:
+
+
+        timestep = <span class="s3">1000</span>
+        e = array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>]], dtype=float)
+        <span class="s2"># initialize vpython</span>
+        scene.forward = vector(<span class="s3">0</span>, -<span class="s3">1</span>, -<span class="s3">10</span>)
+
+        <span class="s2"># We need to make an n body system with position, velocity and mass arrays</span>
+        fivebodysystem = NBody(
+            array([[<span class="s3">2e11</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">1e11</span>, <span class="s3">0</span>], [<span class="s3">0</span>, -<span class="s3">1e11</span>, <span class="s3">0</span>], [-<span class="s3">1e11</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">1e11</span>, <span class="s3">0</span>, <span class="s3">0</span>]], dtype=float),
+            array([<span class="s3">5e30</span>, <span class="s3">5e30</span>, <span class="s3">5e30</span>, <span class="s3">5e30</span>, <span class="s3">5e30</span>]),
+            array([[<span class="s3">0</span>, <span class="s3">2e4</span>, <span class="s3">1e4</span>], [<span class="s3">4e4</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">4e4</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">4e4</span>, <span class="s3">0</span>, <span class="s3">0</span>]], dtype=float),
+            array([<span class="s3">3000</span>, <span class="s3">3000</span>, <span class="s3">3000</span>, <span class="s3">3000</span>, <span class="s3">3000</span>], dtype=float),
+            array([[<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>], [<span class="s3">0</span>, <span class="s3">0</span>, <span class="s3">0</span>]], dtype=float))
+
+        p1 = sphere(pos=fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">0</span>), radius=fivebodysystem.radius[<span class="s3">0</span>] * <span class="s3">1000000</span>,
+                    color=color.yellow, retain=<span class="s3">1000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        p1.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">0</span>)
+        p2 = sphere(pos=fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">1</span>), radius=fivebodysystem.radius[<span class="s3">1</span>] * <span class="s3">1000000</span>,
+                    color=color.red, retain=<span class="s3">1000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        p2.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">1</span>)
+
+        p3 = sphere(pos=fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">2</span>), radius=fivebodysystem.radius[<span class="s3">2</span>] * <span class="s3">1000000</span>,
+                    color=color.orange, retain=<span class="s3">1000000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        p3.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">2</span>)
+
+        p4 = sphere(pos=fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">3</span>), radius=fivebodysystem.radius[<span class="s3">3</span>] * <span class="s3">1000000</span>,
+                    color=color.blue, retain=<span class="s3">1000000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        p4.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">3</span>)
+
+        p5 = sphere(pos=fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">4</span>), radius=fivebodysystem.radius[<span class="s3">3</span>] * <span class="s3">1000000</span>,
+                    color=color.green, retain=<span class="s3">1000000000</span>, interval=<span class="s3">10</span>, make_trail=<span class="s0">True</span>)
+        p5.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">4</span>)
+
+        <span class="s0">while True</span>:
+            rate(<span class="s3">1000</span>)
+            fivebodysystem.updatepos(timestep, <span class="s3">5</span>)
+            p1.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">0</span>)
+            p1.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">0</span>)
+            p2.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">1</span>)
+            p2.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">1</span>)
+            p3.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">2</span>)
+            p3.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">2</span>)
+            p4.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">3</span>)
+            p4.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">3</span>)
+            p5.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">4</span>)
+            p5.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">4</span>)
+
+            <span class="s2"># print(&quot;pos2&quot;,fivebodysystem.updatepos(timestep,4))</span>
+            fivebodysystem.acceleration(<span class="s3">5</span>)
+            p1.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">0</span>)
+            p1.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">0</span>)
+            p2.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">1</span>)
+            p2.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">1</span>)
+            p3.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">2</span>)
+            p3.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">2</span>)
+            p4.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">3</span>)
+            p4.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">3</span>)
+            p5.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">4</span>)
+            p5.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">4</span>)
+
+            <span class="s2"># print(&quot;acc&quot;,fivebodysystem.acceleration(4))</span>
+            fivebodysystem.updatevel(timestep, <span class="s3">5</span>)
+            p1.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">0</span>)
+            p1.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">0</span>)
+            p2.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">1</span>)
+            p2.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">1</span>)
+            p3.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">2</span>)
+            p3.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">2</span>)
+            p4.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">3</span>)
+            p4.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">3</span>)
+            p5.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">4</span>)
+            p5.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">4</span>)
+
+            <span class="s2"># print(&quot;vel&quot;,fivebodysystem.updatevel(timestep,4))</span>
+            fivebodysystem.updatepos(timestep, <span class="s3">5</span>)
+            p1.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">0</span>)
+            p1.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">0</span>)
+            p2.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">1</span>)
+            p2.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">1</span>)
+            p3.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">2</span>)
+            p3.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">2</span>)
+            p4.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">3</span>)
+            p4.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">3</span>)
+            p5.velocity = fivebodysystem.vextract(fivebodysystem.velocity, <span class="s3">4</span>)
+            p5.pos = fivebodysystem.vextract(fivebodysystem.pos, <span class="s3">4</span>)</pre>
+</body>
+</html>
